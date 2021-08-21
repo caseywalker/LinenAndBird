@@ -12,18 +12,21 @@ namespace LinenAndBird.DataAccessLayer
     {
         new Hat
         {
+          Id = Guid.NewGuid(),
           Color = "Blue",
           Designer = "Charlie",
           Style = HatStyle.OpenBack
         },
         new Hat
         {
+          Id = Guid.NewGuid(),
           Color = "Brown",
           Designer = "Casey",
           Style = HatStyle.WideBrim
         },
         new Hat
         {
+          Id = Guid.NewGuid(),
           Color = "Black",
           Designer = "Tom",
           Style = HatStyle.Normal
@@ -37,13 +40,13 @@ namespace LinenAndBird.DataAccessLayer
 
     internal void Add(Hat newHat)
     {
+      newHat.Id = Guid.NewGuid();
       _hats.Add(newHat);
     }
 
     internal List<Hat> GetByStyle(HatStyle style)
     {
-      var matches = _hats.Where(hat => hat.Style == style).ToList();
-      return matches;
+      return _hats.Where(hat => hat.Style == style).ToList();
     }
   }
 }
