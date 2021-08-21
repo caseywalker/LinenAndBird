@@ -48,5 +48,10 @@ namespace LinenAndBird.DataAccessLayer
     {
       return _hats.Where(hat => hat.Style == style).ToList();
     }
+
+    internal Hat GetById(Guid hatId)
+    {
+      return _hats.FirstOrDefault(hat => hat.Id == hatId);
+    }
   }
 }

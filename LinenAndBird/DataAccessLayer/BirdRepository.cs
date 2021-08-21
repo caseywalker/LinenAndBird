@@ -42,5 +42,10 @@ namespace LinenAndBird.DataAccessLayer
 
       _birds.Add(newBird);
     }
+
+    internal Bird GetById(Guid birdId)
+    {
+      return _birds.FirstOrDefault(bird => bird.Id == birdId);
+    }
   }
 }
