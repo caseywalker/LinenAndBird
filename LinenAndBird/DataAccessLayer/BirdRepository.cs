@@ -59,6 +59,7 @@ namespace LinenAndBird.DataAccessLayer
         bird.Size = reader["Size"].ToString();
         bird.Type = (BirdType)reader["Type"];
         bird.Name = reader["Name"].ToString();
+        bird.Color = reader["Color"].ToString();
 
         //each bird goes into the list to return
         birds.Add(bird);
@@ -75,7 +76,38 @@ namespace LinenAndBird.DataAccessLayer
 
     internal Bird GetById(Guid birdId)
     {
-      return _birds.FirstOrDefault(bird => bird.Id == birdId);
+      using var connection = new SqlConnection("Server=localhost;Database=LinenAndBird;Trusted_Connection=True;");
+
+      connection.Open();
+
+      var command = connection.CreateCommand();
+      command.CommandText = $@"SELECT *
+                               FROM Birds
+                                WHERE id= @id";
+
+      //parameterization prevents sql injection
+      command.Parameters.AddWithValue("id", birdId);
+
+      //execute reader is to get all results of the query
+      var reader = command.ExecuteReader();
+
+      // data readers only get one row from the results at a time, need to use a while statement to get all
+      if(reader.Read())
+      {
+        //Mapping data from the relational model to the object model
+        var bird = new Bird();
+        bird.Id = reader.GetGuid(0);
+        bird.Size = reader["Size"].ToString();
+        bird.Type = (BirdType)reader["Type"];
+        bird.Name = reader["Name"].ToString();
+        bird.Color = reader["Color"].ToString();
+
+        //Here we are just returning a single bird
+        return bird;
+      }
+      return null;
+
+      //return _birds.FirstOrDefault(bird => bird.Id == birdId);
     }
   }
 }
