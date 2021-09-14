@@ -47,7 +47,9 @@ namespace LinenAndBird.Controllers
         return BadRequest("Name and Color are required fields");
       }
       _repo.Add(newBird);
-      return Ok();
+      return Created($"/api/birds/{newBird.Id}", newBird);
     }
+
+    [HttpDelete]
   }
 }

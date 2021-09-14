@@ -9,34 +9,12 @@ namespace LinenAndBird.DataAccessLayer
 {
   public class BirdRepository
   {
-
-    static List<Bird> _birds = new List<Bird>
-    {
-      new Bird
-      {
-        Id = Guid.NewGuid(),
-        Name = "Tweety",
-        Color = "Yellow",
-        Size = "Small",
-        Type = BirdType.Dead,
-        Accesories = new List<string>{ "Beanie", "Eye Patch" }
-      },
-      new Bird
-      {
-        Id = Guid.NewGuid(),
-        Name = "Sam",
-        Color = "Green",
-        Size = "Large",
-        Type = BirdType.Linen,
-        Accesories = new List<string>{ "Necklace", "Cannon" }
-      }
-    };
-
+    const string _connectionString = "Server=localhost;Database=LinenAndBird;Trusted_Connection=True;";
 
     internal IEnumerable<Bird> GetAll()
     {
       // connections are like the tunnel between our app and the database
-      using var connection = new SqlConnection("Server=localhost;Database=LinenAndBird;Trusted_Connection=True;");
+      using var connection = new SqlConnection(_connectionString);
       //connections aren't open by default, we've gotta do that ourself
       connection.Open();
 
@@ -67,16 +45,35 @@ namespace LinenAndBird.DataAccessLayer
       return birds;
       //return _birds;
     }
+
     internal void Add(Bird newBird)
     {
-      newBird.Id = Guid.NewGuid();
+      using var connection = new SqlConnection(_connectionString);
 
-      _birds.Add(newBird);
+      connection.Open();
+
+      var command = connection.CreateCommand();
+      command.CommandText = @"insert into birds(Type, Color, Size, Name)
+                              output inserted.Id
+                              values (@Type, @Color, @Size, @Name)";
+
+      command.Parameters.AddWithValue("Type", newBird.Type);
+      command.Parameters.AddWithValue("Color", newBird.Color);
+      command.Parameters.AddWithValue("Size", newBird.Size);
+      command.Parameters.AddWithValue("Name", newBird.Name);
+
+      var newId = (Guid)command.ExecuteScalar();
+
+      newBird.Id = newId;
+
+      //newBird.Id = Guid.NewGuid();
+
+      //_birds.Add(newBird);
     }
 
     internal Bird GetById(Guid birdId)
     {
-      using var connection = new SqlConnection("Server=localhost;Database=LinenAndBird;Trusted_Connection=True;");
+      using var connection = new SqlConnection(_connectionString);
 
       connection.Open();
 
