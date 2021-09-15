@@ -32,18 +32,59 @@ namespace LinenAndBird.DataAccessLayer
       while (reader.Read())
       {
         //Mapping data from the relational model to the object model
-        var bird = new Bird();
-        bird.Id = reader.GetGuid(0);
-        bird.Size = reader["Size"].ToString();
-        bird.Type = (BirdType)reader["Type"];
-        bird.Name = reader["Name"].ToString();
-        bird.Color = reader["Color"].ToString();
+        var bird = MapFromReader(reader);
 
         //each bird goes into the list to return
         birds.Add(bird);
       }
       return birds;
       //return _birds;
+    }
+
+    internal void Remove(Guid id)
+    {
+      using var connection = new SqlConnection(_connectionString);
+
+      connection.Open();
+
+      var command = connection.CreateCommand();
+      command.CommandText = @"Delete
+                              FROM Birds
+                              WHERE Id = @id";
+
+      command.Parameters.AddWithValue("id", id);
+      command.ExecuteReader();
+    }
+
+    internal Bird Update(Guid id, Bird bird)
+    {
+      using var connection = new SqlConnection(_connectionString);
+
+      connection.Open();
+
+      var command = connection.CreateCommand();
+      command.CommandText = @"UPDATE Birds
+                            SET Type = @type,
+	                          Color = @color,
+	                          Size = @size,
+	                          Name = @name
+                            OUTPUT inserted.*
+                            WHERE Id = @id";
+
+      command.Parameters.AddWithValue("color", bird.Color);
+      command.Parameters.AddWithValue("size", bird.Size);
+      command.Parameters.AddWithValue("name", bird.Name);
+      command.Parameters.AddWithValue("type", bird.Type);
+      command.Parameters.AddWithValue("id", id);
+
+      var reader = command.ExecuteReader();
+
+      if (reader.Read())
+      {
+        return MapFromReader(reader);
+      }
+
+      return null;
     }
 
     internal void Add(Bird newBird)
@@ -91,20 +132,24 @@ namespace LinenAndBird.DataAccessLayer
       // data readers only get one row from the results at a time, need to use a while statement to get all
       if(reader.Read())
       {
-        //Mapping data from the relational model to the object model
-        var bird = new Bird();
-        bird.Id = reader.GetGuid(0);
-        bird.Size = reader["Size"].ToString();
-        bird.Type = (BirdType)reader["Type"];
-        bird.Name = reader["Name"].ToString();
-        bird.Color = reader["Color"].ToString();
-
-        //Here we are just returning a single bird
-        return bird;
+        return MapFromReader(reader);
       }
       return null;
 
       //return _birds.FirstOrDefault(bird => bird.Id == birdId);
+    }
+
+    Bird MapFromReader(SqlDataReader reader)
+    {
+      var bird = new Bird();
+      bird.Id = reader.GetGuid(0);
+      bird.Size = reader["Size"].ToString();
+      bird.Type = (BirdType)reader["Type"];
+      bird.Name = reader["Name"].ToString();
+      bird.Color = reader["Color"].ToString();
+
+      //Here we are just returning a single bird
+      return bird;
     }
   }
 }
