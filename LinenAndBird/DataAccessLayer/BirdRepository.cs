@@ -9,34 +9,12 @@ namespace LinenAndBird.DataAccessLayer
 {
   public class BirdRepository
   {
-
-    static List<Bird> _birds = new List<Bird>
-    {
-      new Bird
-      {
-        Id = Guid.NewGuid(),
-        Name = "Tweety",
-        Color = "Yellow",
-        Size = "Small",
-        Type = BirdType.Dead,
-        Accesories = new List<string>{ "Beanie", "Eye Patch" }
-      },
-      new Bird
-      {
-        Id = Guid.NewGuid(),
-        Name = "Sam",
-        Color = "Green",
-        Size = "Large",
-        Type = BirdType.Linen,
-        Accesories = new List<string>{ "Necklace", "Cannon" }
-      }
-    };
-
+    const string _connectionString = "Server=localhost;Database=LinenAndBird;Trusted_Connection=True;";
 
     internal IEnumerable<Bird> GetAll()
     {
       // connections are like the tunnel between our app and the database
-      using var connection = new SqlConnection("Server=localhost;Database=LinenAndBird;Trusted_Connection=True;");
+      using var connection = new SqlConnection(_connectionString);
       //connections aren't open by default, we've gotta do that ourself
       connection.Open();
 
@@ -54,12 +32,7 @@ namespace LinenAndBird.DataAccessLayer
       while (reader.Read())
       {
         //Mapping data from the relational model to the object model
-        var bird = new Bird();
-        bird.Id = reader.GetGuid(0);
-        bird.Size = reader["Size"].ToString();
-        bird.Type = (BirdType)reader["Type"];
-        bird.Name = reader["Name"].ToString();
-        bird.Color = reader["Color"].ToString();
+        var bird = MapFromReader(reader);
 
         //each bird goes into the list to return
         birds.Add(bird);
@@ -67,16 +40,81 @@ namespace LinenAndBird.DataAccessLayer
       return birds;
       //return _birds;
     }
+
+    internal void Remove(Guid id)
+    {
+      using var connection = new SqlConnection(_connectionString);
+
+      connection.Open();
+
+      var command = connection.CreateCommand();
+      command.CommandText = @"Delete
+                              FROM Birds
+                              WHERE Id = @id";
+
+      command.Parameters.AddWithValue("id", id);
+      command.ExecuteReader();
+    }
+
+    internal Bird Update(Guid id, Bird bird)
+    {
+      using var connection = new SqlConnection(_connectionString);
+
+      connection.Open();
+
+      var command = connection.CreateCommand();
+      command.CommandText = @"UPDATE Birds
+                            SET Type = @type,
+	                          Color = @color,
+	                          Size = @size,
+	                          Name = @name
+                            OUTPUT inserted.*
+                            WHERE Id = @id";
+
+      command.Parameters.AddWithValue("color", bird.Color);
+      command.Parameters.AddWithValue("size", bird.Size);
+      command.Parameters.AddWithValue("name", bird.Name);
+      command.Parameters.AddWithValue("type", bird.Type);
+      command.Parameters.AddWithValue("id", id);
+
+      var reader = command.ExecuteReader();
+
+      if (reader.Read())
+      {
+        return MapFromReader(reader);
+      }
+
+      return null;
+    }
+
     internal void Add(Bird newBird)
     {
-      newBird.Id = Guid.NewGuid();
+      using var connection = new SqlConnection(_connectionString);
 
-      _birds.Add(newBird);
+      connection.Open();
+
+      var command = connection.CreateCommand();
+      command.CommandText = @"insert into birds(Type, Color, Size, Name)
+                              output inserted.Id
+                              values (@Type, @Color, @Size, @Name)";
+
+      command.Parameters.AddWithValue("Type", newBird.Type);
+      command.Parameters.AddWithValue("Color", newBird.Color);
+      command.Parameters.AddWithValue("Size", newBird.Size);
+      command.Parameters.AddWithValue("Name", newBird.Name);
+
+      var newId = (Guid)command.ExecuteScalar();
+
+      newBird.Id = newId;
+
+      //newBird.Id = Guid.NewGuid();
+
+      //_birds.Add(newBird);
     }
 
     internal Bird GetById(Guid birdId)
     {
-      using var connection = new SqlConnection("Server=localhost;Database=LinenAndBird;Trusted_Connection=True;");
+      using var connection = new SqlConnection(_connectionString);
 
       connection.Open();
 
@@ -94,20 +132,24 @@ namespace LinenAndBird.DataAccessLayer
       // data readers only get one row from the results at a time, need to use a while statement to get all
       if(reader.Read())
       {
-        //Mapping data from the relational model to the object model
-        var bird = new Bird();
-        bird.Id = reader.GetGuid(0);
-        bird.Size = reader["Size"].ToString();
-        bird.Type = (BirdType)reader["Type"];
-        bird.Name = reader["Name"].ToString();
-        bird.Color = reader["Color"].ToString();
-
-        //Here we are just returning a single bird
-        return bird;
+        return MapFromReader(reader);
       }
       return null;
 
       //return _birds.FirstOrDefault(bird => bird.Id == birdId);
+    }
+
+    Bird MapFromReader(SqlDataReader reader)
+    {
+      var bird = new Bird();
+      bird.Id = reader.GetGuid(0);
+      bird.Size = reader["Size"].ToString();
+      bird.Type = (BirdType)reader["Type"];
+      bird.Name = reader["Name"].ToString();
+      bird.Color = reader["Color"].ToString();
+
+      //Here we are just returning a single bird
+      return bird;
     }
   }
 }
