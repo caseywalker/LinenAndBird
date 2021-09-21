@@ -1,7 +1,9 @@
 ﻿using LinenAndBird.Models;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dapper;
 using System.Threading.Tasks;
 
 namespace LinenAndBird.DataAccessLayer
@@ -32,10 +34,14 @@ namespace LinenAndBird.DataAccessLayer
           Style = HatStyle.Normal
         }
     };
-
+    const string _connectionString = "Server=localhost;Database=LinenAndBird;Trusted_Connection=True;";
     internal List<Hat> GetAll()
     {
-      return _hats;
+      using var db = new SqlConnection(_connectionString);
+      var sql = @"SELECT * FROM Hats";
+      var hats = db.Query<Hat>(sql);
+      
+      return hats.ToList();
     }
 
     internal void Add(Hat newHat)
@@ -51,7 +57,17 @@ namespace LinenAndBird.DataAccessLayer
 
     internal Hat GetById(Guid hatId)
     {
-      return _hats.FirstOrDefault(hat => hat.Id == hatId);
+      using var db = new SqlConnection(_connectionString);
+
+      var sql = @"SELECT *
+                 FROM Hats 
+                 WHERE Id = @id";
+      var parameters = new
+      {
+        id = hatId
+      };
+      var hat = db.QueryFirstOrDefault<Hat>(sql, parameters);
+      return hat;
     }
   }
 }
