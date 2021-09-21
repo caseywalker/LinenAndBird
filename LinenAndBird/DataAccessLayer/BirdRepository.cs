@@ -155,11 +155,22 @@ namespace LinenAndBird.DataAccessLayer
       //using var connection = new SqlConnection(_connectionString);
       using var db = new SqlConnection(_connectionString);
 
-      var sql = @"SELECT *
+      var birdSql = @"SELECT *
                   FROM Birds
                   WHERE id= @id";
 
-      var bird = db.QuerySingleOrDefault<Bird>(sql, new { id = birdId });
+      var bird = db.QuerySingleOrDefault<Bird>(birdSql, new { id = birdId });
+
+      //Get accesories for birds
+      var acessorySql = @"SELECT *
+                          FROM BirdAccesories
+                          WHERE BirdId = @birdId";
+
+      var accesories = db.Query<BirdAccesory>(acessorySql, new { birdId });
+
+      bird.Accesories = accesories.ToList();
+
+
 
       return bird;
       //connection.Open();
