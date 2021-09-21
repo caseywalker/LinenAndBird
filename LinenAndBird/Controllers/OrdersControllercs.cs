@@ -24,6 +24,26 @@ namespace LinenAndBird.Controllers
       _orderRepo = new OrderRepository();
     }
 
+    [HttpGet]
+    public IActionResult GetAllOrders()
+    {
+      return Ok(_orderRepo.GetAll());
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetOrderById(Guid id)
+    {
+      Order order = _orderRepo.Get(id);
+
+      if (order == null)
+      {
+        return NotFound("No order exists with that id");
+      }
+
+      return Ok(order);
+    }
+
+
     //One way of handling below, is one way of getting props from URL
     // api/orders/bird/23523521/hat/123512/28.73 [HttpPost("bird/{birdId}/hat/{hatId}/{price}")]
     //Better way here is to create a model to handle creating an order command from user
