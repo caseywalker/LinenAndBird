@@ -12,7 +12,7 @@ namespace LinenAndBird.Models
     public string Color { get; set; }
     public string Size { get; set; }
     public string Name { get; set; }
-    public List<BirdAccesory> Accesories { get; set; }
+    public List<BirdAccesory> Accessories { get; set; }
   }
 
   public class BirdAccesory

@@ -163,12 +163,12 @@ namespace LinenAndBird.DataAccessLayer
 
       //Get accesories for birds
       var acessorySql = @"SELECT *
-                          FROM BirdAccesories
+                          FROM BirdAccessories
                           WHERE BirdId = @birdId";
 
       var accesories = db.Query<BirdAccesory>(acessorySql, new { birdId });
 
-      bird.Accesories = accesories.ToList();
+      bird.Accessories = accesories.ToList();
 
 
 
