@@ -5,11 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace LinenAndBird.DataAccessLayer
 {
   public class HatRepository
   {
+    readonly string _connectionString;
+
+    public HatRepository(IConfiguration config)
+    {
+      _connectionString = config.GetConnectionString("LinenAndBird");
+    }
+
     static List<Hat> _hats = new List<Hat>
     {
         new Hat
@@ -34,7 +42,6 @@ namespace LinenAndBird.DataAccessLayer
           Style = HatStyle.Normal
         }
     };
-    const string _connectionString = "Server=localhost;Database=LinenAndBird;Trusted_Connection=True;";
     internal List<Hat> GetAll()
     {
       using var db = new SqlConnection(_connectionString);

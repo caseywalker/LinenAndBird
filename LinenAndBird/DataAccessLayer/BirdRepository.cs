@@ -5,12 +5,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.Extensions.Configuration;
 
 namespace LinenAndBird.DataAccessLayer
 {
   public class BirdRepository
   {
-    const string _connectionString = "Server=localhost;Database=LinenAndBird;Trusted_Connection=True;";
+    readonly string _connectionString;
+
+    public BirdRepository(IConfiguration config)
+    {
+      _connectionString = config.GetConnectionString("LinenAndBird");
+    }
 
     internal IEnumerable<Bird> GetAll()
     {
@@ -23,6 +29,14 @@ namespace LinenAndBird.DataAccessLayer
       //Query<T> is for getting results from the database and putting them into a C# type
       var birds = db.Query<Bird>(@"SELECT * 
                     FROM Birds");
+
+      var accessorySql = @"SELECT * From BirdAccessories";
+      var accessories = db.Query<BirdAccesory>(accessorySql);
+
+      foreach (var bird in birds)
+      {
+        bird.Accessories = accessories.Where(accessory => accessory.BirdId == bird.Id).ToList();
+      }
 
       return birds;
       //connections aren't open by default, we've gotta do that ourself

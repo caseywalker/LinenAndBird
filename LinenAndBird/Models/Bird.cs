@@ -19,6 +19,7 @@ namespace LinenAndBird.Models
   {
     public Guid Id { get; set; }
     public string Name { get; set; }
+    public Guid BirdId { get; set; }
   } 
 
   public enum BirdType
