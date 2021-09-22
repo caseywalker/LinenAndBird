@@ -5,12 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace LinenAndBird.DataAccessLayer
 {
   public class OrderRepository
   {
-    const string _connectionString = "Server=localhost;Database=LinenAndBird;Trusted_Connection=True;";
+    readonly string _connectionString;
+
+    public OrderRepository(IConfiguration config)
+    {
+      _connectionString = config.GetConnectionString("LinenAndBird");
+    }
 
 
     internal void Add(Order order)

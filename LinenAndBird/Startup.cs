@@ -1,3 +1,4 @@
+using LinenAndBird.DataAccessLayer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -26,7 +27,10 @@ namespace LinenAndBird
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-
+      services.AddSingleton<IConfiguration>(Configuration); // anytime someone aasks for a thing, give this
+      services.AddTransient<BirdRepository>(); // when someone askes for a repo, provide this. 
+      services.AddTransient<OrderRepository>(); // when someone askes for a repo, provide this. 
+      services.AddTransient<HatRepository>(); // when someone askes for a repo, provide this. 
       services.AddControllers();
       services.AddSwaggerGen(c =>
       {
