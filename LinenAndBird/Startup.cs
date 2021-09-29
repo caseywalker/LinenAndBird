@@ -30,7 +30,7 @@ namespace LinenAndBird
       services.AddSingleton<IConfiguration>(Configuration); // anytime someone aasks for a thing, give this
       services.AddTransient<BirdRepository>(); // when someone askes for a repo, provide this. 
       services.AddTransient<OrderRepository>(); // when someone askes for a repo, provide this. 
-      services.AddTransient<HatRepository>(); // when someone askes for a repo, provide this. 
+      services.AddTransient<IHatRepository, HatRepository>(); // when someone askes for a repo, provide this. 
       services.AddControllers();
       services.AddSwaggerGen(c =>
       {
