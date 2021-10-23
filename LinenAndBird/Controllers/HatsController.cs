@@ -13,8 +13,8 @@ namespace LinenAndBird.Controllers
   [ApiController]
   public class HatsController : ControllerBase
   {
-    HatRepository _repo;
-    public HatsController(HatRepository hatRepo)
+    IHatRepository _repo;
+    public HatsController(IHatRepository hatRepo)
     {
       _repo = hatRepo;
     }

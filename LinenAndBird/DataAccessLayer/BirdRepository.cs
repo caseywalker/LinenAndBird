@@ -35,7 +35,7 @@ namespace LinenAndBird.DataAccessLayer
 
       foreach (var bird in birds)
       {
-        bird.Accessories = accessories.Where(accessory => accessory.BirdId == bird.Id).ToList();
+       bird.Accessories = accessories.Where(accessory => accessory.BirdId == bird.Id).ToList();
       }
 
       return birds;

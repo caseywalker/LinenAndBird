@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace LinenAndBird.DataAccessLayer
 {
-  public class HatRepository
+  public class HatRepository : IHatRepository
   {
     readonly string _connectionString;
 
